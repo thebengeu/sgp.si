@@ -1,0 +1,4 @@
+node_modules
+dist
+app/index.html
+app/psi.json

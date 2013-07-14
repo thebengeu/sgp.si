@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang=en>
+<head>
+  <meta charset=utf-8>
+  <title>SGP.SI</title>
+  <meta name=viewport content="width=device-width, initial-scale=1">
+  <!-- build:css({.tmp,app}) main.css -->
+  <link rel=stylesheet href=main.css>
+  <!-- endbuild -->
+{{#if production}}
+  <style>{{mediaQueries}}</style>
+{{/if}}
+<body>
+<div class=readings>
+  <span class="psi3 header">3-HR PSI</span>
+  <span class="psi3 value {{psiclass psi.psi3}}">{{psi.psi3}}</span>
+  <span class="psi24 header">24-HR PSI</span>
+  <span class="psi24 range {{psiclass psi.psi24}}">{{psi.psi24}}</span>
+  <span class="pm25 header">24-HR PM2.5</span>
+  <span class="pm25 range {{pm25class psi.pm25}}">{{psi.pm25}}</span>
+  <span class="date time">{{moment psi.date "D MMM YYYY @ h A"}}</span>
+</div>
+{{#if production}}
+<a class=twitter-timeline href="https://twitter.com/search?q=%23sghaze" data-widget-id=350980277922840576
+   data-chrome="noborders noscrollbar">Tweets about "#sghaze"</a>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
+{{else}}
+<script>
+  setTimeout(function () {
+    var MIN_WIDTH = 80;
+    var MAX_WIDTH = 720;
+    var WIDTH_STEP = 20;
+    var BOTTOM_MARGIN = 10;
+
+    var mediaQueries = [];
+    var readings = document.querySelector('.readings');
+    var spans = document.querySelectorAll('.readings > span');
+    var style = document.createElement('style');
+
+    var spacings = [];
+    for (var i = 0; i < spans.length; i++) {
+      spacings.push(0);
+    }
+
+    for (var targetWidth = MIN_WIDTH; targetWidth <= MAX_WIDTH; targetWidth += WIDTH_STEP) {
+      var styleRules = '';
+
+      for (i = 0; i < spans.length; i++) {
+        var span = spans[i];
+        span.style.display = 'inline-block';
+
+        span.style.fontSize = Math.round(parseFloat(window.getComputedStyle(span).fontSize) * targetWidth / span.clientWidth) + 'px';
+
+        var diff = targetWidth - span.clientWidth;
+        var spaces = span.textContent.split(' ').length - 1;
+        var spacing = diff ? Math.round(diff / (spaces || span.textContent.length)) : 0;
+        if (spacing !== spacings[i]) {
+          span.style[(spaces ? 'word' : 'letter') + 'Spacing'] = spacing + 'px';
+          spacings[i] = spacing;
+        }
+
+        span.style.display = '';
+        styleRules += '.' + span.classList[0] + '.' + span.classList[1] +
+            '{' + span.style.cssText.replace(/; $| /g, '').replace(/:0px/g, ':0') + '}';
+      }
+
+      mediaQueries.push({
+        minWidth: targetWidth,
+        minHeight: readings.clientHeight,
+        styleRules: styleRules
+      });
+
+      for (i = 0; i < spans.length; i++) {
+        spans[i].removeAttribute('style');
+      }
+    }
+
+    for (i = 0; i < mediaQueries.length; i++) {
+      if (mediaQueries[i].minHeight > 600) {
+        style.textContent += mediaQueries[i - 1].styleRules;
+        break;
+      }
+    }
+    style.textContent += '@media (min-width:0) and (min-height:0){' + mediaQueries[0].styleRules + '}';
+    for (i = 1; i < mediaQueries.length; i++) {
+      style.textContent += '@media (min-width:' + mediaQueries[i].minWidth + 'px) and (min-height:' +
+          (mediaQueries[i].minHeight + BOTTOM_MARGIN) + 'px){' + mediaQueries[i].styleRules + '}';
+    }
+
+    document.head.appendChild(style);
+  }, 500);
+</script>
+{{/if}}

@@ -15,7 +15,7 @@ module.exports = function (grunt) {
       'http://app2.nea.gov.sg/home-lite/psi-lite/24-hour-psi'
     ], function (url, callback) {
       jsdom.env({
-        html: url,
+        url: url,
         src: jquery,
         done: function (err, window) {
           if (err) {
@@ -38,7 +38,8 @@ module.exports = function (grunt) {
       });
     }, function (err, results) {
       if (err) {
-        return done(err);
+        console.log(err);
+        return done(false);
       }
 
       var date = results[0].date;

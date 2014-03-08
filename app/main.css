@@ -54,6 +54,10 @@ span {
     color: #F26C4F
 }
 
+a.twitter-share-button {
+  display: none;
+}
+
 .twitter-share-button {
   position: absolute;
   top: 10px;

@@ -2,17 +2,17 @@
   "name": "sgp.si",
   "version": "0.0.1",
   "dependencies": {
-    "assemble": "~0.4.1",
-    "grunt": "~0.4.1",
-    "grunt-contrib-clean": "~0.4.0",
-    "grunt-contrib-copy": "~0.4.1",
-    "grunt-contrib-cssmin": "~0.6.0",
-    "grunt-contrib-htmlmin": "~0.1.3",
+    "assemble": "~0.4.36",
+    "grunt": "~0.4.3",
+    "grunt-contrib-clean": "~0.5.0",
+    "grunt-contrib-copy": "~0.5.0",
+    "grunt-contrib-cssmin": "~0.9.0",
+    "grunt-contrib-htmlmin": "~0.2.0",
     "grunt-rev": "~0.1.0",
-    "grunt-usemin": "~0.1.10",
-    "jsdom": "~0.7.0",
-    "matchdep": "~0.1.1",
-    "moment": "~2.0.0",
-    "phantom": "~0.5.1"
+    "grunt-usemin": "~2.0.2",
+    "jsdom": "~0.10.1",
+    "matchdep": "~0.3.0",
+    "moment": "~2.5.1",
+    "phantom": "~0.5.4"
   }
 }

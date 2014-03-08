@@ -21,6 +21,7 @@
   <span class="date time">{{moment psi.date "D MMM YYYY @ h A"}}</span>
 </div>
 {{#if production}}
+<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://sgp.si" data-text="3-hour PSI is {{psi.psi3}}. 24-hour PSI is {{removeSpaces psi.psi24}}. 24-hour PM2.5 is {{removeSpaces psi.pm25}}. Issued {{moment psi.date "hA"}}." data-hashtags="sghaze">Tweet</a>
 <a class=twitter-timeline href="https://twitter.com/search?q=%23sghaze" data-widget-id=350980277922840576
    data-chrome="noborders noscrollbar">Tweets about "#sghaze"</a>
 <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>

@@ -18,5 +18,8 @@ module.exports = {
     return require('moment')(date).format(format).toUpperCase();
   },
   psiclass: valueToClassFunc([50, 100, 200, 300]),
-  pm25class: valueToClassFunc([15, 40, 65, 150])
+  pm25class: valueToClassFunc([15, 40, 65, 150]),
+  removeSpaces: function (string) {
+    return string.replace(/ /g, '');
+  }
 };

@@ -54,6 +54,13 @@ span {
     color: #F26C4F
 }
 
+.twitter-share-button {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  width: 100px !important;
+}
+
 a.twitter-timeline {
     display: none;
 }

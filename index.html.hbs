@@ -52,7 +52,23 @@
         var span = spans[i];
         span.style.display = 'inline-block';
 
-        span.style.fontSize = Math.round(parseFloat(window.getComputedStyle(span).fontSize) * targetWidth / span.clientWidth) + 'px';
+        var fontSize = Math.round(parseFloat(window.getComputedStyle(span).fontSize) * targetWidth / span.clientWidth);
+        span.style.fontSize = fontSize + 'px';
+        var diff = targetWidth - span.clientWidth;
+
+        if (diff) {
+          var step = diff > 0 ? 1 : -1;
+          while (true) {
+            span.style.fontSize = fontSize + step + 'px';
+            var newDiff = targetWidth - span.clientWidth;
+            if (Math.abs(newDiff) > Math.abs(diff)) {
+              span.style.fontSize = fontSize + 'px';
+              break;
+            }
+            fontSize += step;
+            diff = newDiff;
+          }
+        }
 
         var spaces = span.textContent.split(' ').length - 1;
         var spacing = Math.round((targetWidth - span.clientWidth) / (spaces || span.textContent.length));

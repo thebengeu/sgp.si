@@ -23,12 +23,12 @@
 </div>
 {{#if production}}
 <div class="social-buttons">
-  <iframe frameborder="0" src="//www.facebook.com/plugins/like.php?href=https%3A%2F%2Fwww.facebook.com%2FSingaporePSI&amp;layout=button_count"></iframe>
   <iframe frameborder="0" src="//platform.twitter.com/widgets/tweet_button.html?hashtags=sghaze&amp;url=http%3A%2F%2Fsgp.si&amp;text={{#encodeURIComponent}}3-hour PSI is {{psi.psi3}}. 24-hour PSI is {{removeSpaces psi.psi24}}. 24-hour PM2.5 is {{removeSpaces psi.pm25}}. Issued {{moment psi.date "hA"}}.{{/encodeURIComponent}}"></iframe>
+  <iframe frameborder="0" src="//www.facebook.com/plugins/like.php?href=https%3A%2F%2Fwww.facebook.com%2FSingaporePSI&amp;layout=button_count"></iframe>
+  <div class="fb-share-button" data-href="http://sgp.si/" data-type="button_count"></div>
 </div>
 <a class=twitter-timeline href="https://twitter.com/search?q=%23sghaze" data-widget-id=350980277922840576
    data-chrome="noborders noscrollbar">Tweets about "#sghaze"</a>
-<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
 <script>
   (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
     (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
@@ -37,6 +37,15 @@
   ga('create', 'UA-42454393-1', 'sgp.si');
   ga('send', 'pageview');
 </script>
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) return;
+  js = d.createElement(s); js.id = id;
+  js.src = "//connect.facebook.net/en_US/all.js#xfbml=1&appId=615668495170315";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+<script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>
 {{else}}
 <script>
   setTimeout(function () {

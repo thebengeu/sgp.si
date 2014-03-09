@@ -66,6 +66,14 @@ iframe {
   border: 0;
 }
 
+.fb-share-button {
+  display: inline !important;
+}
+
+.fb-share-button > span {
+  vertical-align: top !important;
+}
+
 a.twitter-timeline {
     display: none;
 }

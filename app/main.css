@@ -56,8 +56,8 @@ span {
     color: #F26C4F
 }
 
-iframe {
-  margin-top: 20px;
+.social-buttons {
+  margin-top: 50px;
 }
 
 .social-buttons > iframe {

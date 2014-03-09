@@ -11,15 +11,17 @@
 }
 
 body {
-    display: block;
-    background-color: #333;
-    color: #eee;
-    text-align: center;
-    text-shadow: 3px 3px 3px rgba(0, 0, 0, .5);
-    white-space: nowrap;
-    font-size: 999px;
-    font-family: League Gothic, Impact, sans-serif;
-    line-height: .9;
+  background-color: #333;
+  text-align: center;
+}
+
+.readings {
+  color: #eee;
+  text-shadow: 3px 3px 3px rgba(0, 0, 0, .5);
+  white-space: nowrap;
+  font-size: 999px;
+  font-family: League Gothic, Impact, sans-serif;
+  line-height: .9;
 }
 
 span {
@@ -54,15 +56,14 @@ span {
     color: #F26C4F
 }
 
-a.twitter-share-button {
-  display: none;
+iframe {
+  margin-top: 20px;
 }
 
-.twitter-share-button {
-  position: absolute;
-  top: 10px;
-  left: 10px;
-  width: 100px !important;
+.social-buttons > iframe {
+  width: 85px;
+  height: 20px;
+  border: 0;
 }
 
 a.twitter-timeline {
@@ -70,8 +71,6 @@ a.twitter-timeline {
 }
 
 .twitter-timeline {
-    display: block;
-    margin: 60px auto 0;
     max-width: 720px !important;
     width: 100%;
 }

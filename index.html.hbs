@@ -21,7 +21,10 @@
   <span class="date time">{{moment psi.date "D MMM YYYY @ h A"}}</span>
 </div>
 {{#if production}}
-<a href="https://twitter.com/share" class="twitter-share-button" data-url="http://sgp.si" data-text="3-hour PSI is {{psi.psi3}}. 24-hour PSI is {{removeSpaces psi.psi24}}. 24-hour PM2.5 is {{removeSpaces psi.pm25}}. Issued {{moment psi.date "hA"}}." data-hashtags="sghaze">Tweet</a>
+<div class="social-buttons">
+  <iframe frameborder="0" src="//www.facebook.com/plugins/like.php?href=https%3A%2F%2Fwww.facebook.com%2FSingaporePSI&amp;layout=button_count"></iframe>
+  <iframe frameborder="0" src="//platform.twitter.com/widgets/tweet_button.html?hashtags=sghaze&amp;url=http%3A%2F%2Fsgp.si&amp;text={{#encodeURIComponent}}3-hour PSI is {{psi.psi3}}. 24-hour PSI is {{removeSpaces psi.psi24}}. 24-hour PM2.5 is {{removeSpaces psi.pm25}}. Issued {{moment psi.date "hA"}}.{{/encodeURIComponent}}"></iframe>
+</div>
 <a class=twitter-timeline href="https://twitter.com/search?q=%23sghaze" data-widget-id=350980277922840576
    data-chrome="noborders noscrollbar">Tweets about "#sghaze"</a>
 <script>!function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");</script>

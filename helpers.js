@@ -14,6 +14,9 @@ var valueToClassFunc = function (thresholds) {
 };
 
 module.exports = {
+  encodeURIComponent: function(options) {
+    return encodeURIComponent(options.fn(this));
+  },
   moment: function (date, format) {
     return require('moment')(date).format(format).toUpperCase();
   },

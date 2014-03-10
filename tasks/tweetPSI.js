@@ -11,19 +11,32 @@ module.exports = function (grunt) {
     var status = '3-hour PSI is ' + psi.psi3 +
         '. 24-hour PSI is ' + psi.psi24.replace(/ /g, '') +
         '. 24-hour PM2.5 is ' + psi.pm25.replace(/ /g, '') +
-        ' µg/m³. Issued ' + require('moment')(psi.date).format('hA') +
-        '. http://sgp.si #sghaze';
+        ' µg/m³. Issued ' + require('moment')(psi.date).format('hA');
 
     var T = new Twit(config.twitter_credentials);
-    T.post('statuses/update', {
-      status: status,
+    T.get('statuses/user_timeline', {
+      count: 1,
       trim_user: 1
     }, function (err, reply) {
       if (err) {
         grunt.log.error(err);
         return done(false);
       }
-      done();
+
+      if (reply.length && reply[0].text.indexOf(status) !== -1) {
+        return done();
+      }
+
+      T.post('statuses/update', {
+        status: status + '. http://sgp.si #sghaze',
+        trim_user: 1
+      }, function (err, reply) {
+        if (err) {
+          grunt.log.error(err);
+          return done(false);
+        }
+        done();
+      });
     });
   });
 };

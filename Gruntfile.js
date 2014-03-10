@@ -92,6 +92,10 @@ module.exports = function (grunt) {
       dest: '<%= yeoman.app %>/psi.json',
       jquery: 'jquery.min.js'
     },
+    tweetPSI: {
+      src: '<%= yeoman.app %>/psi.json',
+      twitter_credentials: grunt.file.readJSON('twitter_credentials.json')
+    },
     assemblePrepare: {
       src: '<%= yeoman.app %>/index.html',
       dest: '<%= yeoman.app %>/css.json'
@@ -132,6 +136,7 @@ module.exports = function (grunt) {
 
   grunt.registerTask('default', [
     'scrapePSI',
+    'tweetPSI',
     'assemble:development',
     'assemblePrepare',
     'assemble:production',

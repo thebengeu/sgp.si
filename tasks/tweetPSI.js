@@ -11,7 +11,7 @@ module.exports = function (grunt) {
     var status = '3-hour PSI is ' + psi.psi3 +
         '. 24-hour PSI is ' + psi.psi24.replace(/ /g, '') +
         '. 24-hour PM2.5 is ' + psi.pm25.replace(/ /g, '') +
-        ' µg/m³. Issued ' + require('moment')(psi.date).format('hA');
+        ' µg/m³. Issued ' + require('moment')(psi.date).format('ha');
 
     var T = new Twit(config.twitter_credentials);
     T.get('statuses/user_timeline', {

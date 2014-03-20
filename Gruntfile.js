@@ -136,7 +136,6 @@ module.exports = function (grunt) {
 
   grunt.registerTask('default', [
     'scrapePSI',
-    'tweetPSI',
     'assemble:development',
     'assemblePrepare',
     'assemble:production',

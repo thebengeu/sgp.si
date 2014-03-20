@@ -20,7 +20,7 @@ var renderTemplates = function (data) {
 };
 
 gulp.task('templates', function () {
-  renderTemplates({}).pipe(gulp.dest('app'));
+  return renderTemplates({}).pipe(gulp.dest('app'));
 });
 
 gulp.task('phantom', ['templates'], function (cb) {
@@ -56,7 +56,7 @@ gulp.task('phantom', ['templates'], function (cb) {
 });
 
 gulp.task('rev', function () {
-  gulp.src('app/*.{css,eot,png,svg,ttf}')
+  return gulp.src('app/*.{css,eot,png,svg,ttf}')
     .pipe(rev())
     .pipe(gulp.dest('dist'));
 });
@@ -68,15 +68,15 @@ var replaceRev = function (srcGlob, revGlob) {
     var revOrigName = revName.replace(/-[0-9a-f]{8}\./, '.');
     src = src.pipe(replace(revOrigName, revName));
   });
-  src.pipe(gulp.dest('dist'));
+  return src.pipe(gulp.dest('dist'));
 };
 
 gulp.task('replaceRevCss', ['rev'], function () {
-  replaceRev('dist/*.css', 'dist/*.{eot,svg,ttf}');
+  return replaceRev('dist/*.css', 'dist/*.{eot,svg,ttf}');
 });
 
 gulp.task('replaceRevHtml', ['phantom', 'rev'], function () {
-  replaceRev('dist/*.html', 'dist/*.{css,png}');
+  return replaceRev('dist/*.html', 'dist/*.{css,png}');
 });
 
 gulp.task('tweetPSI', function (callback) {
@@ -107,7 +107,7 @@ gulp.task('tweetPSI', function (callback) {
 });
 
 gulp.task('clean', function () {
-  gulp.src('dist', {read: false})
+  return gulp.src('dist', {read: false})
     .pipe(clean());
 });
 

@@ -107,7 +107,7 @@ module.exports = function (grunt) {
       },
       development: {
         files: {
-          '<%= yeoman.app %>/index.html': 'index.html.hbs'
+          '<%= yeoman.app %>/index.html': 'index.hbs'
         }
       },
       production: {
@@ -115,7 +115,7 @@ module.exports = function (grunt) {
           production: true
         },
         files: {
-          '<%= yeoman.app %>/index.html': 'index.html.hbs'
+          '<%= yeoman.app %>/index.html': 'index.hbs'
         }
       }
     }

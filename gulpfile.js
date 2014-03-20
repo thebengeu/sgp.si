@@ -79,7 +79,7 @@ gulp.task('replaceRevHtml', ['phantom', 'rev'], function () {
   return replaceRev('dist/*.html', 'dist/*.{css,png}');
 });
 
-gulp.task('tweetPSI', function (callback) {
+gulp.task('tweetPSI', function (cb) {
   var moment = require('moment');
   var Twit = require('twit');
 
@@ -95,13 +95,13 @@ gulp.task('tweetPSI', function (callback) {
     trim_user: 1
   }, function (err, reply) {
     if (err || (reply.length && reply[0].text.indexOf(status) !== -1)) {
-      return callback(err);
+      return cb(err);
     }
     T.post('statuses/update', {
       status: status + '. http://sgp.si #sghaze',
       trim_user: 1
     }, function (err) {
-      callback(err);
+      cb(err);
     });
   });
 });

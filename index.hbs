@@ -47,80 +47,86 @@
   !function(d,s,id){var js,fjs=d.getElementsByTagName(s)[0],p=/^http:/.test(d.location)?'http':'https';if(!d.getElementById(id)){js=d.createElement(s);js.id=id;js.src=p+"://platform.twitter.com/widgets.js";fjs.parentNode.insertBefore(js,fjs);}}(document,"script","twitter-wjs");
 </script>
 {{else}}
+<script src="webfont.js"></script>
 <script>
-  setTimeout(function () {
-    var MIN_WIDTH = 80;
-    var MAX_WIDTH = 720;
-    var WIDTH_STEP = 20;
-    var BOTTOM_MARGIN = 10;
+  WebFont.load({
+    custom: {
+      families: ['League Gothic']
+    },
+    fontactive: function () {
+      var MIN_WIDTH = 80;
+      var MAX_WIDTH = 720;
+      var WIDTH_STEP = 20;
+      var BOTTOM_MARGIN = 10;
 
-    var mediaQueries = [];
-    var readings = document.querySelector('.readings');
-    var spans = document.querySelectorAll('.readings > span');
-    var style = document.createElement('style');
+      var mediaQueries = [];
+      var readings = document.querySelector('.readings');
+      var spans = document.querySelectorAll('.readings > span');
+      var style = document.createElement('style');
 
-    for (var targetWidth = MIN_WIDTH; targetWidth <= MAX_WIDTH; targetWidth += WIDTH_STEP) {
-      var styleRules = '';
+      for (var targetWidth = MIN_WIDTH; targetWidth <= MAX_WIDTH; targetWidth += WIDTH_STEP) {
+        var styleRules = '';
 
-      for (var i = 0; i < spans.length; i++) {
-        var span = spans[i];
-        span.style.display = 'inline-block';
+        for (var i = 0; i < spans.length; i++) {
+          var span = spans[i];
+          span.style.display = 'inline-block';
 
-        var fontSize = Math.round(parseFloat(window.getComputedStyle(span).fontSize) * targetWidth / span.clientWidth);
-        span.style.fontSize = fontSize + 'px';
-        var diff = targetWidth - span.clientWidth;
+          var fontSize = Math.round(parseFloat(window.getComputedStyle(span).fontSize) * targetWidth / span.clientWidth);
+          span.style.fontSize = fontSize + 'px';
+          var diff = targetWidth - span.clientWidth;
 
-        if (diff) {
-          var step = diff > 0 ? 1 : -1;
-          while (true) {
-            span.style.fontSize = fontSize + step + 'px';
-            var newDiff = targetWidth - span.clientWidth;
-            if (Math.abs(newDiff) > Math.abs(diff)) {
-              span.style.fontSize = fontSize + 'px';
-              break;
+          if (diff) {
+            var step = diff > 0 ? 1 : -1;
+            while (true) {
+              span.style.fontSize = fontSize + step + 'px';
+              var newDiff = targetWidth - span.clientWidth;
+              if (Math.abs(newDiff) > Math.abs(diff)) {
+                span.style.fontSize = fontSize + 'px';
+                break;
+              }
+              fontSize += step;
+              diff = newDiff;
             }
-            fontSize += step;
-            diff = newDiff;
           }
+
+          var spaces = span.textContent.split(' ').length - 1;
+          var spacing = Math.round((targetWidth - span.clientWidth) / (spaces || span.textContent.length));
+          span.style[(spaces ? 'word' : 'letter') + 'Spacing'] = spacing + 'px';
+
+          span.style.display = '';
+          styleRules += '.' + span.classList[0] + '.' + span.classList[1] +
+              '{' + span.style.cssText.replace(/; $| /g, '').replace(/:0px/g, ':0') + '}';
         }
 
-        var spaces = span.textContent.split(' ').length - 1;
-        var spacing = Math.round((targetWidth - span.clientWidth) / (spaces || span.textContent.length));
-        span.style[(spaces ? 'word' : 'letter') + 'Spacing'] = spacing + 'px';
+        mediaQueries.push({
+          minWidth: targetWidth,
+          minHeight: readings.clientHeight,
+          styleRules: styleRules
+        });
 
-        span.style.display = '';
-        styleRules += '.' + span.classList[0] + '.' + span.classList[1] +
-            '{' + span.style.cssText.replace(/; $| /g, '').replace(/:0px/g, ':0') + '}';
+        for (i = 0; i < spans.length; i++) {
+          spans[i].removeAttribute('style');
+        }
       }
 
-      mediaQueries.push({
-        minWidth: targetWidth,
-        minHeight: readings.clientHeight,
-        styleRules: styleRules
-      });
+      for (i = 0; i < mediaQueries.length; i++) {
+        if (mediaQueries[i].minHeight > 600) {
+          style.textContent += mediaQueries[i - 1].styleRules;
+          break;
+        }
+      }
+      style.textContent += '@media (min-width:0) and (min-height:0){' + mediaQueries[0].styleRules + '}';
+      for (i = 1; i < mediaQueries.length; i++) {
+        style.textContent += '@media (min-width:' + mediaQueries[i].minWidth + 'px) and (min-height:' +
+            (mediaQueries[i].minHeight + BOTTOM_MARGIN) + 'px){' + mediaQueries[i].styleRules + '}';
+      }
 
-      for (i = 0; i < spans.length; i++) {
-        spans[i].removeAttribute('style');
+      document.head.appendChild(style);
+
+      if (typeof window.callPhantom === 'function') {
+        window.callPhantom(document.getElementsByTagName('style')[0].textContent);
       }
     }
-
-    for (i = 0; i < mediaQueries.length; i++) {
-      if (mediaQueries[i].minHeight > 600) {
-        style.textContent += mediaQueries[i - 1].styleRules;
-        break;
-      }
-    }
-    style.textContent += '@media (min-width:0) and (min-height:0){' + mediaQueries[0].styleRules + '}';
-    for (i = 1; i < mediaQueries.length; i++) {
-      style.textContent += '@media (min-width:' + mediaQueries[i].minWidth + 'px) and (min-height:' +
-          (mediaQueries[i].minHeight + BOTTOM_MARGIN) + 'px){' + mediaQueries[i].styleRules + '}';
-    }
-
-    document.head.appendChild(style);
-
-    if (typeof window.callPhantom === 'function') {
-      window.callPhantom(document.getElementsByTagName('style')[0].textContent);
-    }
-  }, 500);
+  });
 </script>
 {{/if}}

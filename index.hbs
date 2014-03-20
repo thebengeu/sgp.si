@@ -117,6 +117,10 @@
     }
 
     document.head.appendChild(style);
+
+    if (typeof window.callPhantom === 'function') {
+      window.callPhantom(document.getElementsByTagName('style')[0].textContent);
+    }
   }, 500);
 </script>
 {{/if}}

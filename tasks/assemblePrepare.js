@@ -7,21 +7,16 @@ module.exports = function (grunt) {
     var done = this.async();
     var config = grunt.config(this.name);
 
-    require('phantom').create(function (ph) {
-      ph.createPage(function (page) {
-        page.open('file://' + path.resolve(config.src), function () {
-          setTimeout(function () {
-            page.evaluate(function () {
-              return document.getElementsByTagName('style')[0].textContent;
-            }, function (result) {
-              var assemble = grunt.config('assemble');
-              assemble.options.mediaQueries = result;
-              grunt.config('assemble', assemble);
-              ph.exit();
-              done();
-            });
-          }, 1000);
-        });
+    require('node-phantom-simple').create(function (err, ph) {
+      ph.createPage(function (err, page) {
+        page.onCallback = function (data) {
+          var assemble = grunt.config('assemble');
+          assemble.options.mediaQueries = data;
+          grunt.config('assemble', assemble);
+          ph.exit();
+          done();
+        };
+        page.open('file://' + path.resolve(config.src));
       });
     });
   });

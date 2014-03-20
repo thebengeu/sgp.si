@@ -24,33 +24,28 @@ gulp.task('templates', function () {
 });
 
 gulp.task('phantom', ['templates'], function (cb) {
-  require('phantom').create(function (ph) {
-    ph.createPage(function (page) {
-      page.open('file://' + path.resolve('app/index.html'), function () {
-        setTimeout(function () {
-          page.evaluate(function () {
-            return document.getElementsByTagName('style')[0].textContent;
-          }, function (result) {
-            ph.exit();
-            renderTemplates({mediaQueries: result, production: true})
-              .pipe(htmlmin({
-                removeComments: true,
-                removeCommentsFromCDATA: true,
-                collapseWhitespace: true,
-                collapseBooleanAttributes: true,
-                removeAttributeQuotes: true,
-                removeRedundantAttributes: true,
-                useShortDoctype: true,
-                removeEmptyAttributes: true,
-                removeOptionalTags: true,
-                minifyJS: true,
-                minifyCSS: true
-              }))
-              .pipe(gulp.dest('dist'));
-            cb();
-          });
-        }, 1000);
-      });
+  require('node-phantom-simple').create(function (err, ph) {
+    ph.createPage(function (err, page) {
+      page.onCallback = function (data) {
+        renderTemplates({mediaQueries: data, production: true})
+          .pipe(htmlmin({
+            removeComments: true,
+            removeCommentsFromCDATA: true,
+            collapseWhitespace: true,
+            collapseBooleanAttributes: true,
+            removeAttributeQuotes: true,
+            removeRedundantAttributes: true,
+            useShortDoctype: true,
+            removeEmptyAttributes: true,
+            removeOptionalTags: true,
+            minifyJS: true,
+            minifyCSS: true
+          }))
+          .pipe(gulp.dest('dist'))
+          .on('end', cb);
+        ph.exit();
+      };
+      page.open('file://' + path.resolve('app/index.html'));
     });
   });
 });

@@ -106,6 +106,11 @@ gulp.task('clean', function () {
     .pipe(clean());
 });
 
+gulp.task('copy', function () {
+  return gulp.src('app/*.{htaccess,json}')
+    .pipe(gulp.dest('dist'));
+});
+
 gulp.task('default', ['clean'], function () {
   gulp.start('css', 'html');
 });

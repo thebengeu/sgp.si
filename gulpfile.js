@@ -14,13 +14,17 @@ var rev = require('gulp-rev');
 
 var renderTemplates = function (data) {
   data.helpers = require('./helpers');
-  data.psi = require('./app/psi.json');
+  var psi = require('./app/psi.json');
+  for (var date in psi) {
+    data.psi = psi[date]['Overall Singapore'];
+    data.psi.date = +date;
+  }
   return gulp.src('*.hbs')
     .pipe(consolidate('handlebars', data, {useContents: true}))
     .pipe(rename({extname: '.html'}));
 };
 
-gulp.task('templates', function () {
+gulp.task('templates', ['scrapePSI'], function () {
   return renderTemplates({}).pipe(gulp.dest('app'));
 });
 
@@ -177,13 +181,16 @@ gulp.task('tweetPSI', function (cb) {
   var moment = require('moment');
   var Twit = require('twit');
 
-  var psi = require('app/psi.json');
-  var status = '3-hour PSI is ' + psi.psi3 +
-    '. 24-hour PSI is ' + psi.psi24.replace(/ /g, '') +
-    '. 24-hour PM2.5 is ' + psi.pm25.replace(/ /g, '') +
-    ' µg/m³. Issued ' + moment(psi.date).format('ha');
+  var psi = require('./app/psi.json');
+  for (var date in psi) {
+    var overall = psi[date]['Overall Singapore'];
+    var status = '3-hour PSI is ' + overall.psi_3h +
+      '. 24-hour PSI is ' + overall.psi_24h +
+      '. 1-hour PM2.5 is ' + overall.pm2_5_1h +
+      ' µg/m³. Issued ' + moment(+date).format('ha');
+  }
 
-  var T = new Twit(require('twitter_credentials.json'));
+  var T = new Twit(require('./twitter_credentials.json'));
   T.get('statuses/user_timeline', {
     count: 1,
     trim_user: 1
@@ -205,7 +212,7 @@ gulp.task('clean', function () {
     .pipe(clean());
 });
 
-gulp.task('copy', function () {
+gulp.task('copy', ['scrapePSI'], function () {
   return gulp.src('app/{.htaccess,*.json}')
     .pipe(gulp.dest('dist'));
 });

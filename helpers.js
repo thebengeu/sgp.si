@@ -2,8 +2,8 @@
 
 var classes = ['good', 'moderate', 'unhealthy', 'very-unhealthy', 'hazardous'];
 var valueToClassFunc = function (thresholds) {
-  return function (valueStr) {
-    var value = +valueStr.split(' - ').pop();
+  return function (value) {
+    value = typeof value === 'string' ? +value.split('-').pop() : value;
     for (var i = 0; i < 4; i++) {
       if (value <= thresholds[i]) {
         break;
@@ -22,7 +22,7 @@ module.exports = {
   },
   psiclass: valueToClassFunc([50, 100, 200, 300]),
   pm25class: valueToClassFunc([15, 40, 65, 150]),
-  removeSpaces: function (string) {
-    return string.replace(/ /g, '');
+  addSpacesToDash: function (string) {
+    return string.replace('-', ' - ');
   }
 };

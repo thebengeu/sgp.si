@@ -206,7 +206,7 @@ gulp.task('clean', function () {
 });
 
 gulp.task('copy', function () {
-  return gulp.src('app/*.{htaccess,json}')
+  return gulp.src('app/{.htaccess,*.json}')
     .pipe(gulp.dest('dist'));
 });
 

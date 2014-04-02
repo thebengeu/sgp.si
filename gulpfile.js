@@ -211,5 +211,5 @@ gulp.task('copy', function () {
 });
 
 gulp.task('default', ['clean'], function () {
-  gulp.start('css', 'html');
+  gulp.start('copy', 'css', 'html');
 });

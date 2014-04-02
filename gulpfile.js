@@ -135,6 +135,9 @@ gulp.task('scrapePSI', function (cb) {
         }
       }
 
+      var min_pm_2_5_1h = Number.MAX_VALUE;
+      var max_pm_2_5_1h = Number.MIN_VALUE;
+
       date = datePattern.exec(body)[1];
       var incomplete = false;
       var regions = ['North', 'South', 'East', 'West', 'Central'];
@@ -142,11 +145,16 @@ gulp.task('scrapePSI', function (cb) {
         var row = rows[region];
         var pm2_5_1h_time = Date.parse(date + ' 00:00 +0800') + row.length * 36e5;
         if (pm2_5_1h_time === pollutantTime) {
-          readings[pm2_5_1h_time][region].pm2_5_1h = +row[row.length - 1];
+          var pm2_5_1h = +row[row.length - 1];
+          readings[pm2_5_1h_time][region].pm2_5_1h = pm2_5_1h;
+          min_pm_2_5_1h = Math.min(pm2_5_1h, min_pm_2_5_1h);
+          max_pm_2_5_1h = Math.max(pm2_5_1h, max_pm_2_5_1h);
         } else {
           incomplete = true;
         }
       });
+
+      readings[pollutantTime]['Overall Singapore'].pm2_5_1h = min_pm_2_5_1h + '-' + max_pm_2_5_1h;
 
       date = datePattern.exec(body)[1];
       var psiRow = rows['3-hr PSI'];

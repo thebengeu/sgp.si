@@ -177,7 +177,7 @@ gulp.task('scrapePSI', function (cb) {
     });
 });
 
-gulp.task('tweetPSI', function (cb) {
+gulp.task('tweetPSI', ['scrapePSI'], function (cb) {
   var moment = require('moment');
   var Twit = require('twit');
 

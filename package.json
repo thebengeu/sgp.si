@@ -30,6 +30,7 @@
     "gulp-replace": "^0.2.0",
     "gulp-rev": "^0.3.0",
     "handlebars": "^2.0.0-alpha.2",
-    "node-phantom-simple": "^1.2.0"
+    "node-phantom-simple": "^1.2.0",
+    "request": "^2.34.0"
   }
 }

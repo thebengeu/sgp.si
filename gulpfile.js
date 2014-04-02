@@ -74,6 +74,97 @@ gulp.task('html', ['templates'], function (cb) {
   });
 });
 
+gulp.task('scrapePSI', function (cb) {
+  require('request')('http://app2.nea.gov.sg/anti-pollution-radiation-protection/air-pollution-control/psi/pollutant-concentrations/type/PM25-1Hr',
+    function (err, response, body) {
+      if (err || response.statusCode !== 200) {
+        return cb(err || response.statusCode);
+      }
+
+      var datePattern = /(\d{1,2} \w{3} \d{4})\s*<\/h1>/g;
+      var date = datePattern.exec(body)[1];
+      var hour = +/selected="selected" value="(\d\d)\d\d"/.exec(body)[1];
+      var pollutantTime = Date.parse(date + ' ' + hour + ':00 +0800');
+
+      var readings = {};
+      readings[pollutantTime] = {};
+
+      var pollutantKeys = ['so2_24h', 'pm10_24h', 'no2_1h', 'o3_8h', 'co_8h', 'pm2_5_24h'];
+      var pollutantPattern = /(?:FFFFFF|CAE3F0)">\s*([\w\.]+)(?:\((\d+)\))?/g;
+
+      var min_psi_24h = Number.MAX_VALUE;
+      var max_psi_24h = Number.MIN_VALUE;
+
+      var match;
+      while (match = pollutantPattern.exec(body)) {
+        var region = match[1];
+        readings[pollutantTime][region] = {};
+        var psi_24h = Number.MIN_VALUE;
+
+        pollutantKeys.forEach(function (key) {
+          match = pollutantPattern.exec(body);
+
+          var psiSubIndex = +match[2];
+          if (psiSubIndex > psi_24h) {
+            psi_24h = psiSubIndex;
+          }
+
+          readings[pollutantTime][region][key] = {
+            reading: +match[1],
+            psiSubIndex: psiSubIndex
+          };
+        });
+
+        readings[pollutantTime][region].psi_24h = psi_24h;
+        min_psi_24h = Math.min(psi_24h, min_psi_24h);
+        max_psi_24h = Math.max(psi_24h, max_psi_24h);
+      }
+
+      readings[pollutantTime]['Overall Singapore'] = {};
+      readings[pollutantTime]['Overall Singapore'].psi_24h = min_psi_24h + '-' + max_psi_24h;
+
+      var rowPattern = /<tr>[\s\S]+?<strong>([^<]+)([\s\S]+?)<\/tr>/g;
+      var cellPattern = />\s*(\d+)/g;
+      var rows = {};
+      while (match = rowPattern.exec(body)) {
+        var label = match[1];
+        rows[label] = rows[label] || [];
+        var cell;
+        while (cell = cellPattern.exec(match[2])) {
+          rows[label].push(cell[1]);
+        }
+      }
+
+      date = datePattern.exec(body)[1];
+      var incomplete = false;
+      var regions = ['North', 'South', 'East', 'West', 'Central'];
+      regions.forEach(function (region) {
+        var row = rows[region];
+        var pm2_5_1h_time = Date.parse(date + ' 00:00 +0800') + row.length * 36e5;
+        if (pm2_5_1h_time === pollutantTime) {
+          readings[pm2_5_1h_time][region].pm2_5_1h = +row[row.length - 1];
+        } else {
+          incomplete = true;
+        }
+      });
+
+      date = datePattern.exec(body)[1];
+      var psiRow = rows['3-hr PSI'];
+      var psiTime = Date.parse(date + ' 00:00 +0800') + psiRow.length * 36e5;
+      if (psiTime === pollutantTime) {
+        readings[psiTime]['Overall Singapore'].psi_3h = +psiRow[hour - 1];
+      } else {
+        incomplete = true;
+      }
+
+      if (incomplete) {
+        cb('Readings for latest hour are incomplete.');
+      } else {
+        require('fs').writeFile('app/psi.json', JSON.stringify(readings, null, '\t'), cb);
+      }
+    });
+});
+
 gulp.task('tweetPSI', function (cb) {
   var moment = require('moment');
   var Twit = require('twit');

@@ -164,7 +164,7 @@ gulp.task('scrapePSI', function (cb) {
       var psiRow = rows['3-hr PSI'];
       var psiTime = Date.parse(date + ' 00:00 +0800') + psiRow.length * 36e5;
       if (psiTime === pollutantTime) {
-        readings[psiTime]['Overall Singapore'].psi_3h = +psiRow[hour - 1];
+        readings[psiTime]['Overall Singapore'].psi_3h = +psiRow[psiRow.length - 1];
       } else {
         incomplete = true;
       }

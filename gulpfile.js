@@ -1,5 +1,6 @@
 'use strict';
 
+var _ = require('lodash');
 var clean = require('gulp-clean');
 var consolidate = require('gulp-consolidate');
 var csso = require('gulp-csso');
@@ -85,83 +86,71 @@ gulp.task('scrapePSI', function (cb) {
         return cb(err || response.statusCode);
       }
 
+      var $ = require('cheerio').load(body);
       var datePattern = /(\d{1,2} \w{3} \d{4})\s*<\/h1>/g;
       var date = datePattern.exec(body)[1];
-      var hour = +/selected="selected" value="(\d\d)\d\d"/.exec(body)[1];
+      var hour = $('#ContentPlaceHolderTitle_C001_DDLTime').val().match(/(\d\d)\d\d/)[1];
       var pollutantTime = Date.parse(date + ' ' + hour + ':00 +0800');
 
       var readings = {};
       readings[pollutantTime] = {};
 
+      var tables = $('.c1 table').map(function() {
+        var rows = {};
+        $(this).children('tr').each(function () {
+          var cells = $(this).children();
+          var label = cells.first().text().trim();
+          if (label !== 'Time') {
+            rows[label] = rows[label] || [];
+            cells.slice(1).each(function () {
+              var cellText = $(this).text().trim();
+              if (cellText !== '-') {
+                rows[label].push(cellText);
+              }
+            });
+          }
+        });
+        return rows;
+      }).get();
+
       var pollutantKeys = ['so2_24h', 'pm10_24h', 'no2_1h', 'o3_8h', 'co_8h', 'pm2_5_24h'];
-      var pollutantPattern = /(?:FFFFFF|CAE3F0)">\s*([\w\.]+)(?:\((\d+)\))?/g;
-
-      var min_psi_24h = Number.MAX_VALUE;
-      var max_psi_24h = Number.MIN_VALUE;
-
-      var match;
-      while (match = pollutantPattern.exec(body)) {
-        var region = match[1];
+      _.each(tables[0], function (row, region) {
         readings[pollutantTime][region] = {psiSubIndex: {}};
-        var psi_24h = Number.MIN_VALUE;
-
-        pollutantKeys.forEach(function (key) {
-          match = pollutantPattern.exec(body);
+        pollutantKeys.forEach(function (key, index) {
+          var match = row[index].match(/([\d\.]+)\((\d+|-)\)/);
           readings[pollutantTime][region][key] = +match[1];
 
           var psiSubIndex = +match[2];
           if (!isNaN(psiSubIndex)) {
             readings[pollutantTime][region].psiSubIndex[key] = psiSubIndex;
-            psi_24h = Math.max(psiSubIndex, psi_24h);
           }
         });
-
-        readings[pollutantTime][region].psi_24h = psi_24h;
-        min_psi_24h = Math.min(psi_24h, min_psi_24h);
-        max_psi_24h = Math.max(psi_24h, max_psi_24h);
-      }
-
-      readings[pollutantTime]['Overall Singapore'] = {};
-      readings[pollutantTime]['Overall Singapore'].psi_24h = min_psi_24h + '-' + max_psi_24h;
-
-      var rowPattern = /<tr>[\s\S]+?<strong>([^<]+)([\s\S]+?)<\/tr>/g;
-      var cellPattern = />\s*(\d+)/g;
-      var rows = {};
-      while (match = rowPattern.exec(body)) {
-        var label = match[1];
-        rows[label] = rows[label] || [];
-        var cell;
-        while (cell = cellPattern.exec(match[2])) {
-          rows[label].push(cell[1]);
-        }
-      }
-
-      var min_pm_2_5_1h = Number.MAX_VALUE;
-      var max_pm_2_5_1h = Number.MIN_VALUE;
+        readings[pollutantTime][region].psi_24h = _.max(_.values(readings[pollutantTime][region].psiSubIndex));
+      });
 
       date = datePattern.exec(body)[1];
       var incomplete = false;
-      var regions = ['North', 'South', 'East', 'West', 'Central'];
-      regions.forEach(function (region) {
-        var row = rows[region];
+      _.each(tables[1], function (row, region) {
         var pm2_5_1h_time = Date.parse(date + ' 00:00 +0800') + row.length * 36e5;
         if (pm2_5_1h_time === pollutantTime) {
           var pm2_5_1h = +row[row.length - 1];
           readings[pm2_5_1h_time][region].pm2_5_1h = pm2_5_1h;
-          min_pm_2_5_1h = Math.min(pm2_5_1h, min_pm_2_5_1h);
-          max_pm_2_5_1h = Math.max(pm2_5_1h, max_pm_2_5_1h);
         } else {
           incomplete = true;
         }
       });
 
-      readings[pollutantTime]['Overall Singapore'].pm2_5_1h = min_pm_2_5_1h + '-' + max_pm_2_5_1h;
-
       date = datePattern.exec(body)[1];
-      var psiRow = rows['3-hr PSI'];
+      var psiRow = tables[2]['3-hr PSI'];
       var psiTime = Date.parse(date + ' 00:00 +0800') + psiRow.length * 36e5;
       if (psiTime === pollutantTime) {
-        readings[psiTime]['Overall Singapore'].psi_3h = +psiRow[psiRow.length - 1];
+        var pm2_5_1h = _.pluck(readings[pollutantTime], 'pm2_5_1h');
+        var psi_24h = _.pluck(readings[pollutantTime], 'psi_24h');
+        readings[pollutantTime]['Overall Singapore'] = {
+          pm2_5_1h: _.min(pm2_5_1h) + '-' + _.max(pm2_5_1h),
+          psi_24h: _.min(psi_24h) + '-' + _.max(psi_24h),
+          psi_3h: +psiRow[psiRow.length - 1]
+        };
       } else {
         incomplete = true;
       }

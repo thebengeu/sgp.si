@@ -16,10 +16,8 @@ var rev = require('gulp-rev');
 var renderTemplates = function (data) {
   data.helpers = require('./helpers');
   var psi = require('./app/psi.json');
-  for (var date in psi) {
-    data.psi = psi[date]['Overall Singapore'];
-    data.psi.date = +date;
-  }
+  data.psi = psi['Overall Singapore'];
+  data.psi.date = psi.time;
   return gulp.src('*.hbs')
     .pipe(consolidate('handlebars', data, {useContents: true}))
     .pipe(rename({extname: '.html'}));
@@ -88,13 +86,12 @@ gulp.task('scrapePSI', function (cb) {
       }
 
       var $ = require('cheerio').load(body);
-      var datePattern = /(\d{1,2} \w{3} \d{4})\s*<\/h1>/g;
-      var date = datePattern.exec(body)[1];
+      var dates = $('.c1 h1:not(.title)').map(function () {
+        return $(this).text().trim().match(/\d{1,2} \w{3} \d{4}/);
+      }).get();
       var hour = $('#ContentPlaceHolderTitle_C001_DDLTime').val().match(/(\d\d)\d\d/)[1];
-      var pollutantTime = Date.parse(date + ' ' + hour + ':00 +0800');
-
-      var readings = {};
-      readings[pollutantTime] = {};
+      var pollutantTime = Date.parse(dates[0] + ' ' + hour + ':00 +0800');
+      var readings = {time: new Date(pollutantTime)};
 
       var tables = $('.c1 table').map(function() {
         var rows = {};
@@ -116,52 +113,46 @@ gulp.task('scrapePSI', function (cb) {
 
       var pollutantKeys = ['so2_24h', 'pm10_24h', 'no2_1h', 'o3_8h', 'co_8h', 'pm2_5_24h'];
       _.each(tables[0], function (row, region) {
-        readings[pollutantTime][region] = {psiSubIndex: {}};
+        readings[region] = {psiSubIndex: {}};
         pollutantKeys.forEach(function (key, index) {
           var match = row[index].match(/([\d\.]+)\((\d+|-)\)/);
-          readings[pollutantTime][region][key] = +match[1];
+          readings[region][key] = +match[1];
 
           var psiSubIndex = +match[2];
           if (!isNaN(psiSubIndex)) {
-            readings[pollutantTime][region].psiSubIndex[key] = psiSubIndex;
+            readings[region].psiSubIndex[key] = psiSubIndex;
           }
         });
-        readings[pollutantTime][region].psi_24h = _.max(_.values(readings[pollutantTime][region].psiSubIndex));
-        readings[pollutantTime][region].aqi = aqi.calculateIndex(aqi.convertNeaToEpaConcentrations(readings[pollutantTime][region]), 'aqi_epa');
+        readings[region].psi_24h = _.max(_.values(readings[region].psiSubIndex));
+        readings[region].aqi = aqi.calculateIndex(aqi.convertNeaToEpaConcentrations(readings[region]), 'aqi_epa');
       });
 
-      date = datePattern.exec(body)[1];
-      var incomplete = false;
-      _.each(tables[1], function (row, region) {
-        var pm2_5_1h_time = Date.parse(date + ' 00:00 +0800') + row.length * 36e5;
-        if (pm2_5_1h_time === pollutantTime) {
-          var pm2_5_1h = +row[row.length - 1];
-          readings[pm2_5_1h_time][region].pm2_5_1h = pm2_5_1h;
-        } else {
-          incomplete = true;
+      var getLatestReading = function (tableIndex, label) {
+        var row = tables[tableIndex][label];
+        var time = Date.parse(dates[tableIndex] + ' 00:00 +0800') + row.length * 36e5;
+        if (time !== pollutantTime) {
+          throw 'Readings for latest hour are incomplete.';
         }
-      });
+        return +row[row.length - 1];
+      };
 
-      date = datePattern.exec(body)[1];
-      var psiRow = tables[2]['3-hr PSI'];
-      var psiTime = Date.parse(date + ' 00:00 +0800') + psiRow.length * 36e5;
-      if (psiTime === pollutantTime) {
-        var pm2_5_1h = _.pluck(readings[pollutantTime], 'pm2_5_1h');
-        var psi_24h = _.pluck(readings[pollutantTime], 'psi_24h');
-        readings[pollutantTime]['Overall Singapore'] = {
+      try {
+        for (var region in tables[1]) {
+          readings[region].pm2_5_1h = getLatestReading(1, region);
+        }
+
+        var pm2_5_1h = _.pluck(readings, 'pm2_5_1h');
+        var psi_24h = _.pluck(readings, 'psi_24h');
+        readings['Overall Singapore'] = {
           pm2_5_1h: _.min(pm2_5_1h) + '-' + _.max(pm2_5_1h),
           psi_24h: _.min(psi_24h) + '-' + _.max(psi_24h),
-          psi_3h: +psiRow[psiRow.length - 1]
+          psi_3h: getLatestReading(2, '3-hr PSI')
         };
-      } else {
-        incomplete = true;
+      } catch (err) {
+        cb(err);
       }
 
-      if (incomplete) {
-        cb('Readings for latest hour are incomplete.');
-      } else {
-        require('fs').writeFile('app/psi.json', JSON.stringify(readings, null, '\t'), cb);
-      }
+      require('fs').writeFile('app/psi.json', JSON.stringify(readings, null, '\t'), cb);
     });
 });
 

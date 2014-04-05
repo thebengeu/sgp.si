@@ -5,20 +5,6 @@
     "type": "git",
     "url": "git://github.com/ahbeng/sgp.si.git"
   },
-  "dependencies": {
-    "assemble": "^0.4.37",
-    "grunt": "^0.4.4",
-    "grunt-contrib-clean": "^0.5.0",
-    "grunt-contrib-copy": "^0.5.0",
-    "grunt-contrib-cssmin": "^0.9.0",
-    "grunt-contrib-htmlmin": "^0.2.0",
-    "grunt-rev": "^0.1.0",
-    "grunt-usemin": "^2.1.0",
-    "jsdom": "^0.10.5",
-    "matchdep": "^0.3.0",
-    "moment": "^2.5.1",
-    "twit": "^1.1.12"
-  },
   "devDependencies": {
     "cheerio": "^0.14.0",
     "glob": "^3.2.9",
@@ -32,7 +18,9 @@
     "gulp-rev": "^0.3.2",
     "handlebars": "^2.0.0-alpha.2",
     "lodash": "^2.4.1",
+    "moment": "^2.5.1",
     "node-phantom-simple": "^1.2.0",
-    "request": "^2.34.0"
+    "request": "^2.34.0",
+    "twit": "^1.1.12"
   }
 }

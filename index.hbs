@@ -13,12 +13,14 @@
 {{/if}}
 <body>
 <div class=readings>
-  <span class="psi3 header">3-HR PSI</span>
-  <span class="psi3 value {{psiclass psi.overall.psi_3h}}">{{psi.overall.psi_3h}}</span>
-  <span class="psi24 header">24-HR PSI</span>
-  <span class="psi24 range {{psiclass psi.overall.psi_24h}}">{{addSpacesToDash psi.overall.psi_24h}}</span>
-  <span class="pm25 header">1-HR PM2.5</span>
-  <span class="pm25 range {{pm25class psi.overall.pm2_5_1h}}">{{addSpacesToDash psi.overall.pm2_5_1h}}</span>
+  {{#with psi.overall}}
+    <span class="psi3 header">3-HR PSI</span>
+    <span class="psi3 value {{psiclass psi_3h}}">{{psi_3h}}</span>
+    <span class="psi24 header">24-HR PSI</span>
+    <span class="psi24 range {{psiclass psi_24h}}">{{addSpacesToDash psi_24h}}</span>
+    <span class="pm25 header">1-HR PM2.5</span>
+    <span class="pm25 range {{pm25class pm2_5_1h}}">{{addSpacesToDash pm2_5_1h}}</span>
+  {{/with}}
   <span class="date time">{{moment psi.time "D MMM YYYY @ h A"}}</span>
 </div>
 {{#if production}}

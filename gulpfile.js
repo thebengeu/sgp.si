@@ -80,6 +80,7 @@ gulp.task('html', ['templates'], function (cb) {
 });
 
 gulp.task('scrapePSI', function (cb) {
+  var aqi = require('./aqi');
   require('request')('http://app2.nea.gov.sg/anti-pollution-radiation-protection/air-pollution-control/psi/pollutant-concentrations/type/PM25-1Hr',
     function (err, response, body) {
       if (err || response.statusCode !== 200) {
@@ -126,6 +127,7 @@ gulp.task('scrapePSI', function (cb) {
           }
         });
         readings[pollutantTime][region].psi_24h = _.max(_.values(readings[pollutantTime][region].psiSubIndex));
+        readings[pollutantTime][region].aqi = aqi.calculateIndex(aqi.convertNeaToEpaConcentrations(readings[pollutantTime][region]), 'aqi_epa');
       });
 
       date = datePattern.exec(body)[1];

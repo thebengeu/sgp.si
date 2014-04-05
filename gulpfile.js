@@ -15,9 +15,7 @@ var rev = require('gulp-rev');
 
 var renderTemplates = function (data) {
   data.helpers = require('./helpers');
-  var psi = require('./app/psi.json');
-  data.psi = psi['Overall Singapore'];
-  data.psi.date = psi.time;
+  data.psi = require('./app/psi.json');
   return gulp.src('*.hbs')
     .pipe(consolidate('handlebars', data, {useContents: true}))
     .pipe(rename({extname: '.html'}));
@@ -97,8 +95,8 @@ gulp.task('scrapePSI', function (cb) {
         var rows = {};
         $(this).children('tr').each(function () {
           var cells = $(this).children();
-          var label = cells.first().text().trim();
-          if (label !== 'Time') {
+          var label = cells.first().text().trim().toLowerCase();
+          if (label !== 'time') {
             rows[label] = rows[label] || [];
             cells.slice(1).each(function () {
               var cellText = $(this).text().trim();
@@ -143,10 +141,10 @@ gulp.task('scrapePSI', function (cb) {
 
         var pm2_5_1h = _.pluck(readings, 'pm2_5_1h');
         var psi_24h = _.pluck(readings, 'psi_24h');
-        readings['Overall Singapore'] = {
+        readings.overall = {
           pm2_5_1h: _.min(pm2_5_1h) + '-' + _.max(pm2_5_1h),
           psi_24h: _.min(psi_24h) + '-' + _.max(psi_24h),
-          psi_3h: getLatestReading(2, '3-hr PSI')
+          psi_3h: getLatestReading(2, '3-hr psi')
         };
       } catch (err) {
         cb(err);
@@ -161,10 +159,9 @@ gulp.task('tweetPSI', ['scrapePSI'], function (cb) {
   var Twit = require('twit');
 
   var psi = require('./app/psi.json');
-  var overall = psi['Overall Singapore'];
-  var status = '3-hour PSI is ' + overall.psi_3h +
-    '. 24-hour PSI is ' + overall.psi_24h +
-    '. 1-hour PM2.5 is ' + overall.pm2_5_1h +
+  var status = '3-hour PSI is ' + psi.overall.psi_3h +
+    '. 24-hour PSI is ' + psi.overall.psi_24h +
+    '. 1-hour PM2.5 is ' + psi.overall.pm2_5_1h +
     ' µg/m³. Issued ' + moment(psi.time).format('ha');
 
   var T = new Twit(require('./twitter_credentials.json'));

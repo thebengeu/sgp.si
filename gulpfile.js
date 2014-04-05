@@ -85,11 +85,11 @@ gulp.task('scrapePSI', function (cb) {
 
       var $ = require('cheerio').load(body);
       var dates = $('.c1 h1:not(.title)').map(function () {
-        return $(this).text().trim().match(/\d{1,2} \w{3} \d{4}/);
+        return Date.parse($(this).text().trim().match(/\d{1,2} \w{3} \d{4}/) + 'Z');
       }).get();
       var hour = $('#ContentPlaceHolderTitle_C001_DDLTime').val().match(/(\d\d)\d\d/)[1];
-      var pollutantTime = Date.parse(dates[0] + ' ' + hour + ':00 +0800');
-      var readings = {time: new Date(pollutantTime)};
+      var pollutantTime = dates[0] + hour * 36e5;
+      var readings = {time: new Date(pollutantTime).toJSON().slice(0, -8) + '+0800'};
 
       var tables = $('.c1 table').map(function() {
         var rows = {};
@@ -127,8 +127,7 @@ gulp.task('scrapePSI', function (cb) {
 
       var getLatestReading = function (tableIndex, label) {
         var row = tables[tableIndex][label];
-        var time = Date.parse(dates[tableIndex] + ' 00:00 +0800') + row.length * 36e5;
-        if (time !== pollutantTime) {
+        if (dates[tableIndex] + row.length * 36e5 !== pollutantTime) {
           throw 'Readings for latest hour are incomplete.';
         }
         return +row[row.length - 1];

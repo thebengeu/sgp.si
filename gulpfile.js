@@ -15,7 +15,7 @@ var rev = require('gulp-rev');
 
 var renderTemplates = function (data) {
   data.helpers = require('./helpers');
-  data.psi = require('./app/psi.json');
+  data.psi = require('./app/now.json');
   return gulp.src('*.hbs')
     .pipe(consolidate('handlebars', data, {useContents: true}))
     .pipe(rename({extname: '.html'}));
@@ -150,7 +150,7 @@ gulp.task('scrapePSI', function (cb) {
         cb(err);
       }
 
-      require('fs').writeFile('app/psi.json', JSON.stringify(readings, null, '\t'), cb);
+      require('fs').writeFile('app/now.json', JSON.stringify(readings, null, '\t'), cb);
     });
 });
 
@@ -158,7 +158,7 @@ gulp.task('tweetPSI', ['scrapePSI'], function (cb) {
   var moment = require('moment');
   var Twit = require('twit');
 
-  var psi = require('./app/psi.json');
+  var psi = require('./app/now.json');
   var status = '3-hour PSI is ' + psi.overall.psi_3h +
     '. 24-hour PSI is ' + psi.overall.psi_24h +
     '. 1-hour PM2.5 is ' + psi.overall.pm2_5_1h +

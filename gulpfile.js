@@ -161,13 +161,11 @@ gulp.task('tweetPSI', ['scrapePSI'], function (cb) {
   var Twit = require('twit');
 
   var psi = require('./app/psi.json');
-  for (var date in psi) {
-    var overall = psi[date]['Overall Singapore'];
-    var status = '3-hour PSI is ' + overall.psi_3h +
-      '. 24-hour PSI is ' + overall.psi_24h +
-      '. 1-hour PM2.5 is ' + overall.pm2_5_1h +
-      ' µg/m³. Issued ' + moment(+date).format('ha');
-  }
+  var overall = psi['Overall Singapore'];
+  var status = '3-hour PSI is ' + overall.psi_3h +
+    '. 24-hour PSI is ' + overall.psi_24h +
+    '. 1-hour PM2.5 is ' + overall.pm2_5_1h +
+    ' µg/m³. Issued ' + moment(psi.time).format('ha');
 
   var T = new Twit(require('./twitter_credentials.json'));
   T.get('statuses/user_timeline', {

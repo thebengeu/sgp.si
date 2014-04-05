@@ -102,21 +102,18 @@ gulp.task('scrapePSI', function (cb) {
       var match;
       while (match = pollutantPattern.exec(body)) {
         var region = match[1];
-        readings[pollutantTime][region] = {};
+        readings[pollutantTime][region] = {psiSubIndex: {}};
         var psi_24h = Number.MIN_VALUE;
 
         pollutantKeys.forEach(function (key) {
           match = pollutantPattern.exec(body);
+          readings[pollutantTime][region][key] = +match[1];
 
           var psiSubIndex = +match[2];
-          if (psiSubIndex > psi_24h) {
-            psi_24h = psiSubIndex;
+          if (!isNaN(psiSubIndex)) {
+            readings[pollutantTime][region].psiSubIndex[key] = psiSubIndex;
+            psi_24h = Math.max(psiSubIndex, psi_24h);
           }
-
-          readings[pollutantTime][region][key] = {
-            reading: +match[1],
-            psiSubIndex: psiSubIndex
-          };
         });
 
         readings[pollutantTime][region].psi_24h = psi_24h;

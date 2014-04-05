@@ -153,6 +153,21 @@ gulp.task('scrapePSI', function (cb) {
     });
 });
 
+// Pad number to two digits.
+var padTwo = function(number) {
+  return (number < 10 ? '0' : '') + number;
+};
+
+gulp.task('archivePSI', ['scrapePSI'], function () {
+  var time = new Date(require('./app/now.json').time.slice(0, -5) + 'Z');
+  return gulp.src('app/now.json')
+    .pipe(rename({
+      basename: padTwo(time.getUTCHours()) + padTwo(time.getUTCMinutes())
+    }))
+    .pipe(gulp.dest(require('path').join('app', time.getUTCFullYear().toString(),
+      padTwo(time.getUTCMonth() + 1), padTwo(time.getUTCDate()))));
+});
+
 gulp.task('tweetPSI', ['scrapePSI'], function (cb) {
   var moment = require('moment');
   var Twit = require('twit');
@@ -185,8 +200,8 @@ gulp.task('clean', function () {
     .pipe(clean());
 });
 
-gulp.task('copy', ['scrapePSI'], function () {
-  return gulp.src('app/{.htaccess,*.json}')
+gulp.task('copy', ['archivePSI'], function () {
+  return gulp.src('app/{.htaccess,**/*.json}')
     .pipe(gulp.dest('dist'));
 });
 

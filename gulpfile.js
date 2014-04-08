@@ -205,6 +205,6 @@ gulp.task('copy', ['archivePSI'], function () {
     .pipe(gulp.dest('dist'));
 });
 
-gulp.task('default', ['clean'], function () {
+gulp.task('default', function () {
   gulp.start('copy', 'css', 'html');
 });

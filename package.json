@@ -18,8 +18,8 @@
     "gulp-rev": "^0.4.0",
     "handlebars": "^2.0.0-alpha.4",
     "lodash": "^2.4.1",
-    "node-phantom-simple": "^1.2.0",
     "moment": "^2.6.0",
+    "phantom": "^0.6.3",
     "request": "^2.36.0",
     "twit": "^1.1.15"
   }

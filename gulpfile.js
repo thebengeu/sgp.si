@@ -48,9 +48,9 @@ gulp.task('css', ['rev'], function () {
 });
 
 gulp.task('html', ['templates'], function (cb) {
-  require('node-phantom-simple').create(function (err, ph) {
-    ph.createPage(function (err, page) {
-      page.onCallback = function (data) {
+  require('phantom').create(function (ph) {
+    ph.createPage(function (page) {
+      page.set('onCallback', function (data) {
         var src = renderTemplates({mediaQueries: data, production: true});
         replaceRev(src, 'dist/*.{css,png}')
           .pipe(htmlmin({
@@ -69,7 +69,7 @@ gulp.task('html', ['templates'], function (cb) {
           .pipe(gulp.dest('dist'))
           .on('end', cb);
         ph.exit();
-      };
+      });
       page.open('file://' + path.resolve('app/index.html'));
     });
   });

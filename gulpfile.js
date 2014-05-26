@@ -72,6 +72,10 @@ gulp.task('html', ['templates'], function (cb) {
       });
       page.open('file://' + path.resolve('app/index.html'));
     });
+    setTimeout(function () {
+      ph.exit();
+      cb('timeout');
+    }, 32768);
   });
 });
 

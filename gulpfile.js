@@ -81,18 +81,19 @@ gulp.task('html', ['templates'], function (cb) {
 
 gulp.task('scrapePSI', function (cb) {
   var aqi = require('./aqi');
-  require('request')('http://app2.nea.gov.sg/anti-pollution-radiation-protection/air-pollution-control/psi/pollutant-concentrations/type/PM25-1Hr',
+  require('request')('http://www.nea.gov.sg/anti-pollution-radiation-protection/air-pollution-control/psi/pollutant-concentrations',
     function (err, response, body) {
       if (err || response.statusCode !== 200) {
         return cb(err || response.statusCode);
       }
 
+      var pollutantTime = 0;
       var $ = require('cheerio').load(body);
       var dates = $('.c1 h1:not(.title)').map(function () {
         return Date.parse($(this).text().trim().match(/\d{1,2} \w{3} \d{4}/) + 'Z');
       }).get();
       var hour = $('#ContentPlaceHolderTitle_C001_DDLTime').val().match(/(\d\d)\d\d/)[1];
-      var pollutantTime = dates[0] + hour * 36e5;
+      pollutantTime = dates[0] + hour * 36e5;
       var readings = {time: new Date(pollutantTime).toJSON().slice(0, -8) + '+0800'};
 
       var tables = $('.c1 table').map(function() {
@@ -153,7 +154,49 @@ gulp.task('scrapePSI', function (cb) {
         cb(err);
       }
 
-      require('fs').writeFile('app/now.json', JSON.stringify(readings, null, '\t'), cb);
+      // Grab the pm2.5 readings from another page.
+      require('request')('http://www.nea.gov.sg/anti-pollution-radiation-protection/air-pollution-control/psi/1-hr-pm2-5-readings',
+        function (err, response, body) {
+          if (err || response.statusCode !== 200) {
+            return cb(err || response.statusCode);
+          }
+
+          var $ = require('cheerio').load(body);
+          var pm25Readings = {};
+          var currentDate = Date.parse($('.c1 h1#pollutant').text().trim().match(/\d{1,2} \w{3} \d{4}/) + 'Z');
+
+          $('.c1 table.noalter').children('tr:not(.even)').map(function(index, el) { 
+            var cells = $(el).children();
+            var regionLabel = cells.first().text().trim().toLowerCase();
+            pm25Readings[regionLabel] = pm25Readings[regionLabel] || [];
+            cells.slice(1).each(function () {
+              var cellText = $(this).text().trim();
+              if (cellText !== '-') {
+                pm25Readings[regionLabel].push(parseInt(cellText));
+              }
+            });
+          });
+        
+          var getLatestPM25Reading = function(regionLabel) {
+            var row = pm25Readings[regionLabel];
+            if (currentDate + row.length * 36e5 !== pollutantTime) {
+              throw 'Readings for latest hour are incomplete.';
+            }
+            return row[row.length - 1];
+          };
+
+          try {
+            for (var region in pm25Readings) {
+              readings[region].pm2_5_1h = getLatestPM25Reading(region);
+            }
+            var pm2_5_1h = _.pluck(readings, 'pm2_5_1h');
+            pm2_5_1h = pm2_5_1h.filter(function(val) { return typeof(val) === "number"; });
+            readings.overall.pm2_5_1h = _.min(pm2_5_1h) + '-' + _.max(pm2_5_1h);
+          } catch (err) {
+            cb(err);
+          }
+          require('fs').writeFile('app/now.json', JSON.stringify(readings, null, '\t'), cb);
+        });
     });
 });
 

@@ -172,7 +172,7 @@ gulp.task('scrapePSI', function (cb) {
             cells.slice(1).each(function () {
               var cellText = $(this).text().trim();
               if (cellText !== '-') {
-                pm25Readings[regionLabel].push(parseInt(cellText));
+                pm25Readings[regionLabel].push(cellText);
               }
             });
           });
@@ -182,7 +182,7 @@ gulp.task('scrapePSI', function (cb) {
             if (currentDate + row.length * 36e5 !== pollutantTime) {
               throw 'Readings for latest hour are incomplete.';
             }
-            return row[row.length - 1];
+            return +row[row.length - 1];
           };
 
           try {
